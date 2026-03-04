@@ -2,53 +2,61 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- TODO 
+-- 1) В модуле 1_WIRE убрать старый код
+-- 2) В модуле 1_WIRE добавить чтение ID из BRAM
+-- 3) В модуле 1_WIRE добавить формирование слова TEMP (с флагом и TEMP)
+-- 4) В модуле 1_WIRE добавить запись TEMP в BRAM
+-- 4) В модуле TOP добавить модуль 1_WIRE
+
+
 entity TOP is
   port (
     CLK_50MHz : in std_logic;
     CLK_16MHz : in std_logic;
 
     -- Светодиоды
-    LED_D3 : out std_logic;
-    LED_D4 : out std_logic;
-    LED_D5 : out std_logic;
-    LED_D6 : out std_logic;
-    LED_D7 : out std_logic;
-    LED_D8 : out std_logic;
+    LED_D3 : out std_logic := '1';
+    LED_D4 : out std_logic := '1';
+    LED_D5 : out std_logic := '1';
+    LED_D6 : out std_logic := '1';
+    LED_D7 : out std_logic := '1';
+    LED_D8 : out std_logic := '1';
 
     -- Отладочные ножки
-    p28 : out std_logic;
-    p30 : out std_logic;
-    p32 : out std_logic;
-    p33 : out std_logic;
-    p38 : out std_logic;
-    p39 : out std_logic;
-    p42 : out std_logic;
-    p43 : out std_logic;
-    p44 : out std_logic;
-    p46 : out std_logic;
-    p49 : out std_logic;
+    p28 : inout std_logic := 'Z';
+    p30 : out std_logic   := '0';
+    p32 : out std_logic   := '0';
+    p33 : out std_logic   := '0';
+    p38 : out std_logic   := '0';
+    p39 : out std_logic   := '0';
+    p42 : out std_logic   := '0';
+    p43 : out std_logic   := '0';
+    p44 : out std_logic   := '0';
+    p46 : out std_logic   := '0';
+    p49 : out std_logic   := '0';
 
     -- UART
-    p113 : out std_logic; -- TX
-    p114 : in std_logic;  -- RX
+    p113 : out std_logic := '1'; -- TX
+    p114 : in std_logic;         -- RX
 
     -- 7-сегментный дисплей
-    p127 : out std_logic; -- A
-    p126 : out std_logic; -- B
-    p125 : out std_logic; -- C
-    p124 : out std_logic; -- D
-    p121 : out std_logic; -- E
-    p120 : out std_logic; -- F
-    p119 : out std_logic; -- G
-    p115 : out std_logic; -- DP
-    p128 : out std_logic; -- BIT0
-    p129 : out std_logic; -- BIT1
-    p132 : out std_logic; -- BIT2
-    p133 : out std_logic; -- BIT3
-    p135 : out std_logic; -- BIT4
-    p136 : out std_logic; -- BIT5
-    p137 : out std_logic; -- BIT6
-    p138 : out std_logic  -- BIT7
+    p127 : out std_logic := '1'; -- A
+    p126 : out std_logic := '1'; -- B
+    p125 : out std_logic := '1'; -- C
+    p124 : out std_logic := '1'; -- D
+    p121 : out std_logic := '1'; -- E
+    p120 : out std_logic := '1'; -- F
+    p119 : out std_logic := '1'; -- G
+    p115 : out std_logic := '1'; -- DP
+    p128 : out std_logic := '1'; -- BIT0
+    p129 : out std_logic := '1'; -- BIT1
+    p132 : out std_logic := '1'; -- BIT2
+    p133 : out std_logic := '1'; -- BIT3
+    p135 : out std_logic := '1'; -- BIT4
+    p136 : out std_logic := '1'; -- BIT5
+    p137 : out std_logic := '1'; -- BIT6
+    p138 : out std_logic := '1'  -- BIT7
   );
 end entity;
 
@@ -57,17 +65,23 @@ architecture RTL of TOP is
   -- =========================================================================
   -- TEST REG
   -- =========================================================================
-  signal r_Cnt  : unsigned(15 downto 0)        := (others => '0');
+  signal r_Cnt  : unsigned(15 downto 0)         := (others => '0');
   signal r_Test : std_logic_vector(15 downto 0) := (others => '0');
-  
+
   -- =========================================================================
   -- MHz & kHz GENERATOR
   -- =========================================================================
-  signal r_MHz_1  : std_logic        := '0';
-  signal r_kHz_1  : std_logic        := '0';
-  
+  signal r_MHz_1 : std_logic := '0';
+  signal r_kHz_1 : std_logic := '0';
+
+  -- =========================================================================
+  -- 1-WIRE
+  -- =========================================================================
+  signal r_LINE1_1WIRE_IN : std_logic := '0';
+  signal r_LINE1_1WIRE_OUT : std_logic := 'Z';
+
 begin
-  
+
   p28 <= r_Cnt(5);
   p30 <= r_Cnt(6);
   p32 <= r_Cnt(7);
@@ -79,7 +93,7 @@ begin
   p44 <= r_Cnt(13);
   p46 <= r_Cnt(14);
   p49 <= r_Cnt(15);
-  
+
   process (CLK_16MHz)
   begin
     if rising_edge(CLK_16MHz) then
@@ -87,7 +101,7 @@ begin
     end if;
   end process;
 
-    -- =========================================================================
+  -- =========================================================================
   -- MHz & kHz GENERATOR
   -- =========================================================================  
   process (CLK_16MHz)
@@ -118,32 +132,36 @@ begin
       end if;
     end if;
   end process;
-  
+
   -- =========================================================================
   -- 1-WIRE
   -- =========================================================================
-ONE_WIRE_BLOCK_v5_1_inst: entity work.ONE_WIRE_BLOCK_v5_1
- port map(
-    i_Clk => CLK_16MHz,
-    i_1MHz => r_MHz_1,
-    i_1kHz => r_kHz_1,
-    i_ID_DATA => (others => '0'),
-    o_ID_ADDR => open,
-    o_TEMP_ADDR => open,
-    o_TEMP_WR => open,
-    o_LINE1_TEMP_DATA => open,
-    o_LINE2_TEMP_DATA => open,
-    o_LINE3_TEMP_DATA => open,
-    o_LINE4_TEMP_DATA => open,
-    i_LINE1_1WIRE => i_LINE1_1WIRE,
-    i_LINE2_1WIRE => '0',
-    i_LINE3_1WIRE => '0',
-    i_LINE4_1WIRE => '0',
-    o_LINE1_1WIRE => open,
-    o_LINE2_1WIRE => open,
-    o_LINE3_1WIRE => open,
-    o_LINE4_1WIRE => open,
-    o_Test => r_Test
-);
+  ONE_WIRE_BLOCK_v5_1_inst : entity work.ONE_WIRE_BLOCK_v5_1
+    port map
+    (
+      i_Clk             => CLK_16MHz,
+      i_1MHz            => r_MHz_1,
+      i_1kHz            => r_kHz_1,
+      i_ID_DATA => (others => '0'),
+      o_ID_ADDR         => open,
+      o_TEMP_ADDR       => open,
+      o_TEMP_WR         => open,
+      o_LINE1_TEMP_DATA => open,
+      o_LINE2_TEMP_DATA => open,
+      o_LINE3_TEMP_DATA => open,
+      o_LINE4_TEMP_DATA => open,
+      i_LINE1_1WIRE     => r_LINE1_1WIRE_IN,
+      i_LINE2_1WIRE     => '0',
+      i_LINE3_1WIRE     => '0',
+      i_LINE4_1WIRE     => '0',
+      o_LINE1_1WIRE     => r_LINE1_1WIRE_OUT,
+      o_LINE2_1WIRE     => open,
+      o_LINE3_1WIRE     => open,
+      o_LINE4_1WIRE     => open,
+      o_Test            => r_Test
+    );
+
+  r_LINE1_1WIRE_IN <= p28;
+  p28 <= '0' when (r_LINE1_1WIRE_OUT = '0') else 'Z';
 
 end architecture;
