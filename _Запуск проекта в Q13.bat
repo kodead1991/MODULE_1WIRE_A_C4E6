@@ -6,7 +6,7 @@ set QUARTUS_PATH=C:\altera\13.0sp1\quartus\bin64\quartus.exe
 
 :: Получаем путь к папке, где находится bat-файл
 set BAT_DIR=%~dp0
-set PROJECT_FILE=%BAT_DIR%AC4-EDA.qpf
+set PROJECT_FILE=%BAT_DIR%MODULE_1WIRE.qpf
 
 echo Quartus path = %QUARTUS_PATH%
 echo Bat dir = %BAT_DIR%

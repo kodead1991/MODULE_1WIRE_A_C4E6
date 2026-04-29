@@ -15,27 +15,32 @@
 *.rrbf
 *.sof
 
+!/src/
+!*.vhd
+!*.pdf
+!_Запуск проекта в Q13.bat
 
-/*.summary
-/*.bdf
-/*.txt
-/*.log
-/*.cfg
-/*.mgf
-/*.order
-/*.erp
-/*.erf
-/*.lib*
-/*.ini
-/*.epr
-/*.cmd
-/*.opv
-/*.opt
-/*.pin
-/*.smsg
-/*.rep
-/*.rlb
-/*.jdi
+
+*.summary
+*.bdf
+*.txt
+*.log
+*.cfg
+*.mgf
+*.order
+*.erp
+*.erf
+*.lib*
+*.ini
+*.epr
+*.cmd
+*.opv
+*.opt
+*.pin
+*.smsg
+*.rep
+*.rlb
+*.jdi
 
 
 
@@ -45,5 +50,6 @@
 /db/
 /greybox_tmp/
 /incremental_db/
-#/simulation/
+/simulation/
 /testbench_files/
+/output_files/
